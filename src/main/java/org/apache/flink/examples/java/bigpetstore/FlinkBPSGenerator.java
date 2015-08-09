@@ -33,9 +33,9 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.examples.java.wordcount.util.WordCountData;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
-import org.apache.flink.types.Record;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 
 /**
@@ -57,7 +57,7 @@ public class FlinkBPSGenerator {
 	
 	public static void main(String[] args) throws Exception {
 
-		final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		int nStores=100;
 		
 		FlinkBPSGenerator generator = new FlinkBPSGenerator();
@@ -75,11 +75,10 @@ public class FlinkBPSGenerator {
 		}
 		
 		//now need to put customers into n partitions, and have each partition run a generator.
-		DataSet<Customer> data = env.fromCollection(customers);
+		DataStream<Customer> data = env.fromCollection(customers);
 		data.map(
 				new MapFunction<Customer, Transaction>() {
 
-					@Override
 					public Transaction map(Customer value) throws Exception {
 
 						//todo... finish this part.
@@ -101,7 +100,6 @@ public class FlinkBPSGenerator {
 	 */
 	public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Integer>> {
 
-		@Override
 		public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
 			// normalize and split the line
 			String[] tokens = value.toLowerCase().split("\\W+");
@@ -144,12 +142,10 @@ public class FlinkBPSGenerator {
 	}
 	
 	private static DataSet<String> getTextDataSet(ExecutionEnvironment env) {
-		if(fileOutput) {
+		if (fileOutput) {
 			// read the text file from given input path
 			return env.readTextFile(textPath);
-		} else {
-			// get default test text data
-			return WordCountData.getDefaultTextLineDataSet(env);
 		}
+		return null;
 	}
 }
