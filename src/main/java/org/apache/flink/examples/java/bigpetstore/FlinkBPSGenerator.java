@@ -20,14 +20,15 @@ package org.apache.flink.examples.java.bigpetstore;
 
 import java.util.List;
 
-import org.apache.bigtop.bigpetstore.datagenerator.CustomerGenerator;
-import org.apache.bigtop.bigpetstore.datagenerator.DataLoader;
-import org.apache.bigtop.bigpetstore.datagenerator.StoreGenerator;
-import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Customer;
-import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Store;
-import org.apache.bigtop.bigpetstore.datagenerator.datamodels.Transaction;
-import org.apache.bigtop.bigpetstore.datagenerator.datamodels.inputs.InputData;
-import org.apache.bigtop.bigpetstore.datagenerator.framework.SeedFactory;
+import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfile;
+import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfileBuilder;
+import com.github.rnowling.bps.datagenerator.datamodels.*;
+import com.github.rnowling.bps.datagenerator.DataLoader;
+import com.github.rnowling.bps.datagenerator.StoreGenerator;
+import com.github.rnowling.bps.datagenerator.CustomerGenerator;
+import com.github.rnowling.bps.datagenerator.datamodels.inputs.InputData;
+import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
+
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
@@ -81,7 +82,8 @@ public class FlinkBPSGenerator {
 
 					public Transaction map(Customer value) throws Exception {
 
-						//todo... finish this part.
+								//id.getProductCategories();
+
 						return null;
 					}
 				});
@@ -143,8 +145,7 @@ public class FlinkBPSGenerator {
 	
 	private static DataSet<String> getTextDataSet(ExecutionEnvironment env) {
 		if (fileOutput) {
-			// read the text file from given input path
-			return env.readTextFile(textPath);
+			return env.readTextFile(textPath); // read the text file from given input path
 		}
 		return null;
 	}
