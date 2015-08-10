@@ -64,13 +64,12 @@ public class FlinkBPSGenerator {
 
         FlinkBPSGenerator generator = new FlinkBPSGenerator();
         final InputData id = new DataLoader().loadData();
-        final SeedFactory seedFactory = new SeedFactory(1);
-        StoreGenerator sg = new StoreGenerator(id, seedFactory);
+         StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));
         final List<Store> stores = Lists.newArrayList();
         for (int i = 0; i < nStores; i++) {
             stores.add(sg.generate());
         }
-        CustomerGenerator cg = new CustomerGenerator(id, stores, seedFactory);
+        CustomerGenerator cg = new CustomerGenerator(id, stores, new SeedFactory(1));
         final List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < nStores; i++) {
             customers.add(cg.generate());
@@ -83,9 +82,9 @@ public class FlinkBPSGenerator {
                     public List<Transaction> map(Customer value) throws Exception {
 
                         Collection<ProductCategory> products = id.getProductCategories();
-                        PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, seedFactory);
+                        PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, new SeedFactory(1));
                         PurchasingProfile profile = profileGen.generate();
-                        TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, seedFactory);
+                        TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, new SeedFactory(1));
                         List<Transaction> transactions = Lists.newArrayList();
                         Transaction transaction = transGen.generate();
                         transactions.add(transaction);
@@ -93,6 +92,7 @@ public class FlinkBPSGenerator {
                         while (transaction.getDateTime() < simulationLength) {
                             //TODO implement burn in time like we do in bps-spark
                             transactions.add(transaction);
+                            System.out.println("ASDF "+transaction);
                             transaction = transGen.generate();
                         }
                         return transactions;
