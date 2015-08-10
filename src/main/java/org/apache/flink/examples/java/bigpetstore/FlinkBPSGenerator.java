@@ -78,8 +78,12 @@ public class FlinkBPSGenerator {
             customers.add(cg.generate());
         }
 
+        System.out.print("from coll");
+
         //now need to put customers into n partitions, and have each partition run a generator.
         DataStream<Customer> data = env.fromCollection(customers);
+
+        System.out.print("now mapping...."+data );
         data.map(
                 new MapFunction<Customer, List<Transaction>>() {
                     public List<Transaction> map(Customer value) throws Exception {
