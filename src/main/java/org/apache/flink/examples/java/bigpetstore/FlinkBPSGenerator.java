@@ -21,12 +21,10 @@ package org.apache.flink.examples.java.bigpetstore;
 import java.util.Collection;
 import java.util.List;
 
+import com.github.rnowling.bps.datagenerator.*;
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfile;
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfileBuilder;
 import com.github.rnowling.bps.datagenerator.datamodels.*;
-import com.github.rnowling.bps.datagenerator.DataLoader;
-import com.github.rnowling.bps.datagenerator.StoreGenerator;
-import com.github.rnowling.bps.datagenerator.CustomerGenerator;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.InputData;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.ProductCategory;
 import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
@@ -60,19 +58,20 @@ public class FlinkBPSGenerator {
 	
 	public static void main(String[] args) throws Exception {
 
+		final int simulationLength=10;
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		int nStores=100;
 		
 		FlinkBPSGenerator generator = new FlinkBPSGenerator();
 		final InputData id = new DataLoader().loadData();
-		SeedFactory seedFactory = new SeedFactory(1);
+		final SeedFactory seedFactory = new SeedFactory(1);
 		StoreGenerator sg = new StoreGenerator(id, seedFactory);
-		List<Store> stores = Lists.newArrayList();
+		final List<Store> stores = Lists.newArrayList();
 		for(int i = 0 ; i < nStores ; i++){
 			stores.add(sg.generate());			
 		}
 		CustomerGenerator cg = new CustomerGenerator(id, stores, seedFactory);
-		List<Customer> customers = Lists.newArrayList();
+		final List<Customer> customers = Lists.newArrayList();
 		for(int i = 0 ; i < nStores ; i++){
 			customers.add(cg.generate());			
 		}
@@ -80,13 +79,23 @@ public class FlinkBPSGenerator {
 		//now need to put customers into n partitions, and have each partition run a generator.
 		DataStream<Customer> data = env.fromCollection(customers);
 		data.map(
-				new MapFunction<Customer, Transaction>() {
+				new MapFunction<Customer, List<Transaction>>() {
+					public List<Transaction> map(Customer value) throws Exception {
 
-					public Transaction map(Customer value) throws Exception {
-
-						Collection<ProductCategory> categories=id.getProductCategories();
-				
-						return null;
+						Collection<ProductCategory> products=id.getProductCategories();
+						PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, seedFactory);
+						PurchasingProfile profile = profileGen.generate();
+						TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, seedFactory)
+						List<Transaction> transactions = Lists.newArrayList();
+						Transaction transaction = transGen.generate();
+						transactions.add(transaction);
+						//Create a list of this customer's transactions for the time period
+						while(transaction.getDateTime() < simulationLength) {
+							//TODO implement burn in time like we do in bps-spark
+							transactions.add(transaction);
+							transaction = transGen.generate();
+						}
+						return transactions;
 					}
 				});
 		
