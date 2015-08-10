@@ -18,6 +18,7 @@
 
 package org.apache.flink.examples.java.bigpetstore;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfile;
@@ -27,6 +28,7 @@ import com.github.rnowling.bps.datagenerator.DataLoader;
 import com.github.rnowling.bps.datagenerator.StoreGenerator;
 import com.github.rnowling.bps.datagenerator.CustomerGenerator;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.InputData;
+import com.github.rnowling.bps.datagenerator.datamodels.inputs.ProductCategory;
 import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
 
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -62,7 +64,7 @@ public class FlinkBPSGenerator {
 		int nStores=100;
 		
 		FlinkBPSGenerator generator = new FlinkBPSGenerator();
-		InputData id = new DataLoader().loadData();
+		final InputData id = new DataLoader().loadData();
 		SeedFactory seedFactory = new SeedFactory(1);
 		StoreGenerator sg = new StoreGenerator(id, seedFactory);
 		List<Store> stores = Lists.newArrayList();
@@ -82,8 +84,8 @@ public class FlinkBPSGenerator {
 
 					public Transaction map(Customer value) throws Exception {
 
-								//id.getProductCategories();
-
+						Collection<ProductCategory> categories=id.getProductCategories();
+				
 						return null;
 					}
 				});
