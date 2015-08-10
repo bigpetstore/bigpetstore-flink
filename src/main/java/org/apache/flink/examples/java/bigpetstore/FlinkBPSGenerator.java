@@ -64,12 +64,15 @@ public class FlinkBPSGenerator {
 
         FlinkBPSGenerator generator = new FlinkBPSGenerator();
         final InputData id = new DataLoader().loadData();
-         StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));
+
+        //TODO Reuse seedfactory rather than recreate each time!
+        // SeedFactory seedFac = new SeedFactory(1);
+         StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));//see above todo
         final List<Store> stores = Lists.newArrayList();
         for (int i = 0; i < nStores; i++) {
             stores.add(sg.generate());
         }
-        CustomerGenerator cg = new CustomerGenerator(id, stores, new SeedFactory(1));
+        CustomerGenerator cg = new CustomerGenerator(id, stores, new SeedFactory(1));//see above todo
         final List<Customer> customers = Lists.newArrayList();
         for (int i = 0; i < nStores; i++) {
             customers.add(cg.generate());
@@ -82,6 +85,8 @@ public class FlinkBPSGenerator {
                     public List<Transaction> map(Customer value) throws Exception {
 
                         Collection<ProductCategory> products = id.getProductCategories();
+
+                        //TODO reus seedfactory variable above.
                         PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, new SeedFactory(1));
                         PurchasingProfile profile = profileGen.generate();
                         TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, new SeedFactory(1));
@@ -92,7 +97,7 @@ public class FlinkBPSGenerator {
                         while (transaction.getDateTime() < simulationLength) {
                             //TODO implement burn in time like we do in bps-spark
                             transactions.add(transaction);
-                            System.out.println("ASDF "+transaction);
+                            System.out.println("... "+transaction);
                             transaction = transGen.generate();
                         }
                         return transactions;
