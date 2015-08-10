@@ -27,11 +27,11 @@ under the License.
 	<packaging>jar</packaging>
 
 	<repositories>
-				<repository>
-					<id>bintray-rnowling-bigpetstore</id>
-					<name>bintray</name>
-					<url>http://dl.bintray.com/rnowling/bigpetstore</url>
-				</repository>
+    <repository>
+        <id>bintray-rnowling-bigpetstore</id>
+        <name>bintray</name>
+        <url>http://dl.bintray.com/rnowling/bigpetstore</url>
+    </repository>
 	</repositories>
 	<dependencies>
 		<dependency>
