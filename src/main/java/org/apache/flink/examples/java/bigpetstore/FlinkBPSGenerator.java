@@ -85,7 +85,7 @@ public class FlinkBPSGenerator {
                         Collection<ProductCategory> products = id.getProductCategories();
                         PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, seedFactory);
                         PurchasingProfile profile = profileGen.generate();
-                        TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, seedFactory)
+                        TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, seedFactory);
                         List<Transaction> transactions = Lists.newArrayList();
                         Transaction transaction = transGen.generate();
                         transactions.add(transaction);
