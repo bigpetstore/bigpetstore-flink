@@ -36,6 +36,7 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
 
@@ -65,9 +66,8 @@ public class FlinkBPSGenerator {
         FlinkBPSGenerator generator = new FlinkBPSGenerator();
         final InputData id = new DataLoader().loadData();
 
-        //TODO Reuse seedfactory rather than recreate each time!
-        // SeedFactory seedFac = new SeedFactory(1);
-         StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));//see above todo
+        //TODO Should we  reuse the seed factory?
+        StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));//see above todo
         final List<Store> stores = Lists.newArrayList();
         for (int i = 0; i < nStores; i++) {
             stores.add(sg.generate());
@@ -78,13 +78,14 @@ public class FlinkBPSGenerator {
             customers.add(cg.generate());
         }
 
-        System.out.print("from coll");
+        System.out.println("-- from coll");
 
         //now need to put customers into n partitions, and have each partition run a generator.
         DataStream<Customer> data = env.fromCollection(customers);
 
-        System.out.print("now mapping...."+data );
-        data.map(
+        System.out.println("-- xyz now mapping...." + data);
+
+        SingleOutputStreamOperator<List<Transaction>,?> so = data.map(
                 new MapFunction<Customer, List<Transaction>>() {
                     public List<Transaction> map(Customer value) throws Exception {
 
@@ -108,7 +109,10 @@ public class FlinkBPSGenerator {
                     }
                 });
 
-
+        System.out.println("ASDF");
+        System.out.println("count "+ so.count().print());
+        so.writeAsText("/tmp/a");
+        env.execute();
     }
 
     // *************************************************************************
