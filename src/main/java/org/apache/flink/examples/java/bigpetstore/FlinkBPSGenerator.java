@@ -18,10 +18,19 @@
 
 package org.apache.flink.examples.java.bigpetstore;
 
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.github.rnowling.bps.datagenerator.*;
+import com.github.rnowling.bps.datagenerator.datamodels.Product;
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfile;
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfileBuilder;
 import com.github.rnowling.bps.datagenerator.datamodels.*;
@@ -29,6 +38,9 @@ import com.github.rnowling.bps.datagenerator.datamodels.inputs.InputData;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.ProductCategory;
 import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
 
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math.stat.descriptive.summary.*;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
@@ -57,7 +69,51 @@ public class FlinkBPSGenerator {
 
     }
 
+   public static final class ProductSerializer extends com.esotericsoftware.kryo.Serializer<Product> implements Serializable {
+        @Override
+        public void write(Kryo kryo, Output output, com.github.rnowling.bps.datagenerator.datamodels.Product object) {
+            for(String f: object.getFieldNames()){
+                output.writeAscii(f+","+object.getFieldValue(f));
+            }
+        }
+
+        @Override
+        public Product read(Kryo kryo, Input input, Class<com.github.rnowling.bps.datagenerator.datamodels.Product> type) {
+            String[] csv=input.readString().split(",");
+            Map<String,Object> entries = new HashMap<String,Object>();
+            for(int i = 0 ; i < csv.length; i++){
+                if(csv.length>i+1){
+                    //add the product entries one by one.
+                    entries.put(csv[i],csv[i+1]);
+                }
+                else{
+                    throw new RuntimeException("Missing value for product " + csv[i] + " in serialized string " + StringUtils.join(csv));
+                }
+            }
+            return new Product(entries);
+        }
+    }
+
+    public static final class TransactionSerializer extends com.esotericsoftware.kryo.Serializer<Transaction> implements Serializable {
+        @Override
+        public void write(Kryo kryo, Output output, com.github.rnowling.bps.datagenerator.datamodels.Transaction object) {
+            try{
+                output.write(SerializationUtils.serialize(object));
+            }
+            catch(Throwable t){
+                throw new RuntimeException(t);
+            }
+
+        }
+
+        @Override
+        public Transaction read(Kryo kryo, Input input, Class<com.github.rnowling.bps.datagenerator.datamodels.Transaction> type) {
+            com.github.rnowling.bps.datagenerator.datamodels.Transaction p = (Transaction) SerializationUtils.deserialize(input.getInputStream());
+            return p;
+        }
+    }
     public static void main(String[] args) throws Exception {
+
 
         final int simulationLength = 10;
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -79,6 +135,10 @@ public class FlinkBPSGenerator {
         }
 
         System.out.println("-- from coll");
+
+
+        ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Product.class, new ProductSerializer());
+        ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class, new TransactionSerializer());
 
         //now need to put customers into n partitions, and have each partition run a generator.
         DataStream<Customer> data = env.fromCollection(customers);
