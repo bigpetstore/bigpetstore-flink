@@ -33,13 +33,13 @@ under the License.
 					<url>http://dl.bintray.com/rnowling/bigpetstore</url>
 				</repository>
 	</repositories>
-	<dependency>
-		<groupId>com.esotericsoftware.kryo</groupId>
-		<artifactId>kryo</artifactId>
-		<version>2.16</version>
-	</dependency>
 	<dependencies>
-		<dependency>
+	<dependency>
+        <groupId>com.esotericsoftware.kryo</groupId>
+        <artifactId>kryo</artifactId>
+        <version>2.16</version>
+    </dependency>
+        <dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-java</artifactId>
 			<version>0.9.0-hadoop1</version>
