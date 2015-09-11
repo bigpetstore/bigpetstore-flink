@@ -18,13 +18,8 @@
 
 package org.apache.flink.examples.java.bigpetstore;
 
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -32,7 +27,6 @@ import com.esotericsoftware.kryo.io.Output;
 import com.github.rnowling.bps.datagenerator.*;
 import com.github.rnowling.bps.datagenerator.datamodels.Product;
 import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfile;
-import com.github.rnowling.bps.datagenerator.datamodels.PurchasingProfileBuilder;
 import com.github.rnowling.bps.datagenerator.datamodels.*;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.InputData;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.ProductCategory;
@@ -40,7 +34,6 @@ import com.github.rnowling.bps.datagenerator.framework.SeedFactory;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.math.stat.descriptive.summary.*;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.DataSet;
@@ -64,7 +57,7 @@ public class FlinkBPSGenerator {
     }
 
 
-    public void writeData(DataSet env) {
+    public void writeData(DataSet<String> env) {
 
 
     }
@@ -80,7 +73,7 @@ public class FlinkBPSGenerator {
         @Override
         public Product read(Kryo kryo, Input input, Class<com.github.rnowling.bps.datagenerator.datamodels.Product> type) {
             String[] csv=input.readString().split(",");
-            Map<String,Object> entries = new HashMap<String,Object>();
+            Map<String,Object> entries = new HashMap<>();
             for(int i = 0 ; i < csv.length; i++){
                 if(csv.length>i+1){
                     //add the product entries one by one.
@@ -108,8 +101,7 @@ public class FlinkBPSGenerator {
 
         @Override
         public Transaction read(Kryo kryo, Input input, Class<com.github.rnowling.bps.datagenerator.datamodels.Transaction> type) {
-            com.github.rnowling.bps.datagenerator.datamodels.Transaction p = (Transaction) SerializationUtils.deserialize(input.getInputStream());
-            return p;
+            return (Transaction) SerializationUtils.deserialize(input.getInputStream());
         }
     }
     public static void main(String[] args) throws Exception {
@@ -124,7 +116,7 @@ public class FlinkBPSGenerator {
 
         //TODO Should we  reuse the seed factory?
         StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));//see above todo
-        final List<Store> stores = Lists.newArrayList();
+        final List<Store> stores = new ArrayList<>();
         for (int i = 0; i < nStores; i++) {
             stores.add(sg.generate());
         }
@@ -151,7 +143,7 @@ public class FlinkBPSGenerator {
 
                         Collection<ProductCategory> products = id.getProductCategories();
 
-                        //TODO reus seedfactory variable above.
+                        //TODO reuse seedfactory variable above.
                         PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, new SeedFactory(1));
                         PurchasingProfile profile = profileGen.generate();
                         TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, new SeedFactory(1));
@@ -193,7 +185,7 @@ public class FlinkBPSGenerator {
             // emit the pairs
             for (String token : tokens) {
                 if (token.length() > 0) {
-                    out.collect(new Tuple2<String, Integer>(token, 1));
+                    out.collect(new Tuple2<>(token, 1));
                 }
             }
         }
