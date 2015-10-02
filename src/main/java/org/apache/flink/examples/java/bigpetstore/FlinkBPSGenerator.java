@@ -18,7 +18,11 @@
 
 package org.apache.flink.examples.java.bigpetstore;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,13 +50,19 @@ import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.io.FileOutputFormat;
+import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.FileSinkFunction;
+import org.apache.flink.streaming.api.functions.sink.FileSinkFunctionByMillis;
 import org.apache.flink.util.Collector;
 
 /**
@@ -171,66 +181,49 @@ public class FlinkBPSGenerator {
 
     System.out.println("ASDF");
     System.out.println("count " + so.count().print());
-    so.writeAsText("/tmp/a");
+//    so.writeAsText("/tmp/a");
+    so.write((new TransactionListOutputFormat("/tmp/a")), 0L);
     env.execute();
   }
 
-  // *************************************************************************
-  //     USER FUNCTIONS
-  // *************************************************************************
+  // Sink reusable for batch programs
+  public static class TransactionListOutputFormat extends FileOutputFormat<List<Transaction>> {
 
-  /**
-   * Implements the string tokenizer that splits sentences into words as a user-defined
-   * FlatMapFunction. The function takes a line (String) and splits it into
-   * multiple pairs in the form of "(word,1)" (Tuple2<String, Integer>).
-   */
-  public static final class Tokenizer implements FlatMapFunction<String, Tuple2<String, Integer>> {
+    private transient Writer wrt;
 
-    public void flatMap(String value, Collector<Tuple2<String, Integer>> out) {
-      // normalize and split the line
-      String[] tokens = value.toLowerCase().split("\\W+");
+    public TransactionListOutputFormat(String outputPath) {
+      super(new Path(outputPath));
+    }
 
-      // emit the pairs
-      for (String token : tokens) {
-        if (token.length() > 0) {
-          out.collect(new Tuple2<>(token, 1));
-        }
+    @Override
+    public void open(int i, int i1) throws IOException {
+      super.open(i,i1);
+      wrt = new OutputStreamWriter(new BufferedOutputStream(this.stream, 4096));
+    }
+
+    @Override
+    public void writeRecord(List<Transaction> transactions) throws IOException {
+      wrt.write("[");
+      for (Transaction transaction : transactions){
+        wrt.write("(");
+        wrt.write("ID=" + transaction.getId() + ", ");
+        wrt.write("Customer=" + transaction.getCustomer() + ", ");
+        wrt.write("Store=" + transaction.getStore() + ", ");
+        wrt.write("DateTime=" + transaction.getDateTime() + ", ");
+        wrt.write("Products=" + transaction.getProducts());
+        wrt.write(")");
+        wrt.write("; ");
       }
+      wrt.write("]");
     }
-  }
 
-  // *************************************************************************
-  //     UTIL METHODS
-  // *************************************************************************
-
-  private static boolean fileOutput = false;
-  private static String textPath;
-  private static String outputPath;
-
-  private static boolean parseParameters(String[] args) {
-
-    if (args.length > 0) {
-      // parse input arguments
-      fileOutput = true;
-      if (args.length == 2) {
-        textPath = args[0];
-        outputPath = args[1];
-      } else {
-        System.err.println("Usage: WordCount <text path> <result path>");
-        return false;
+    @Override
+    public void close() throws IOException {
+      if (wrt != null) {
+        wrt.flush();
+        wrt.close();
       }
-    } else {
-      System.out.println("Executing WordCount example with built-in default data.");
-      System.out.println("  Provide parameters to read input data from a file.");
-      System.out.println("  Usage: WordCount <text path> <result path>");
+      super.close();
     }
-    return true;
-  }
-
-  private static DataSet<String> getTextDataSet(ExecutionEnvironment env) {
-    if (fileOutput) {
-      return env.readTextFile(textPath); // read the text file from given input path
-    }
-    return null;
   }
 }
