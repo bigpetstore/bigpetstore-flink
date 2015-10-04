@@ -152,10 +152,6 @@ public class FlinkBPSGenerator {
 
     System.out.println("-- from coll");
 
-
-//    env.registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Product.class, new ProductSerializer());
-//    env.registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class, new TransactionSerializer());
-
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
 
@@ -210,20 +206,10 @@ public class FlinkBPSGenerator {
 
     @Override
     public void writeRecord(List<Transaction> transactions) throws IOException {
-//      wrt.write("[");
       for (Transaction transaction : transactions) {
         wrt.write(MAPPER.writeValueAsString(transaction));
         wrt.write("\n");
-//        wrt.write("(");
-//        wrt.write("ID=" + transaction.getId() + ", ");
-//        wrt.write("Customer=" + transaction.getCustomer().getName() + ", ");
-//        wrt.write("Store=" + transaction.getStore() + ", ");
-//        wrt.write("DateTime=" + transaction.getDateTime() + ", ");
-//        wrt.write("Products=" + transaction.getProducts());
-//        wrt.write(")");
-//        wrt.write("; ");
       }
-//      wrt.write("]");
     }
 
     @Override
