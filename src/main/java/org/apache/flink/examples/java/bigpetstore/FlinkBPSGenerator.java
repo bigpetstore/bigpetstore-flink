@@ -183,12 +183,6 @@ public class FlinkBPSGenerator {
           }
         });
 
-    System.out.println("ASDF");
-    System.out.println("count " + so.count().print());
-<<<<<<< HEAD
-=======
-
->>>>>>> streaming template
     so.write((new TransactionListOutputFormat("/tmp/a")), 0L);
     env.execute();
   }
