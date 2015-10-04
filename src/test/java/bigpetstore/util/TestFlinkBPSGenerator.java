@@ -17,6 +17,7 @@
  */
 
 package bigpetstore.util;
+import org.apache.flink.examples.java.bigpetstore.FlinkBPSGenerator;
 import org.junit.Test;
 
 /**
@@ -26,7 +27,11 @@ public class TestFlinkBPSGenerator {
 
   @Test
   public void test1(){
-
-
+    try{
+      FlinkBPSGenerator.main("/tmp/a","10","10");
+    }
+    catch(Exception e){
+      e.printStackTrace();
+    }
   }
 }

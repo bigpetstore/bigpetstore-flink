@@ -55,18 +55,12 @@ import org.apache.flink.api.common.io.FileOutputFormat;
 import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.sink.FileSinkFunction;
-import org.apache.flink.streaming.api.functions.sink.FileSinkFunctionByMillis;
-import org.apache.flink.streaming.api.functions.source.FileMonitoringFunction;
-import org.apache.flink.util.Collector;
 
 /**
  *
@@ -128,12 +122,18 @@ public class FlinkBPSGenerator {
     }
   }
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * Args:
+   *  (1) the output file (i.e. /tmp/a => write data files to /tmp/a/1, /tmp/a/2, and so on).
+   *  (2) sim length (i.e. 10 => 10 days).
+   *  (3) the stores (i.e.  3 => 3 stores randomly created)
+   */
+  public static void main(String inOutputfile, String inSimlength, String inStores, String... others) throws Exception {
 
-
-    final int simulationLength = 10;
+    final String outputfile = inOutputfile;
+    final int simulationLength = Integer.parseInt(inSimlength);
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-    int nStores = 100;
+    int nStores = Integer.parseInt(inStores);
 
     FlinkBPSGenerator generator = new FlinkBPSGenerator();
     final InputData id = new DataLoader().loadData();
@@ -149,8 +149,6 @@ public class FlinkBPSGenerator {
     for (int i = 0; i < nStores; i++) {
       customers.add(cg.generate());
     }
-
-    System.out.println("-- from coll");
 
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
@@ -184,7 +182,7 @@ public class FlinkBPSGenerator {
           }
         });
 
-    so.write((new TransactionListOutputFormat("/tmp/a")), 0L);
+    so.write((new TransactionListOutputFormat(outputfile)), 0L);
     env.execute();
   }
 
