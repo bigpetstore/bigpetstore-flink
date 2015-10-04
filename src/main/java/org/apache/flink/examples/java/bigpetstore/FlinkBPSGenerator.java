@@ -205,7 +205,9 @@ public class FlinkBPSGenerator {
     @Override
     public void writeRecord(List<Transaction> transactions) throws IOException {
       for (Transaction transaction : transactions) {
-        wrt.write(MAPPER.writeValueAsString(transaction));
+        FlinkSerTransaction fst = new FlinkSerTransaction(transaction);
+        //TODO add native serialization support to bps so that this hack is unnecessary.
+        wrt.write(MAPPER.writeValueAsString(fst));
         wrt.write("\n");
       }
     }
