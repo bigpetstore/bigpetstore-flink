@@ -32,6 +32,7 @@ import java.util.Map;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.rnowling.bps.datagenerator.CustomerGenerator;
 import com.github.rnowling.bps.datagenerator.DataLoader;
 import com.github.rnowling.bps.datagenerator.PurchasingProfileGenerator;
@@ -72,6 +73,8 @@ import org.apache.flink.util.Collector;
  */
 @SuppressWarnings("serial")
 public class FlinkBPSGenerator {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   public DataSet<String> generateData(ExecutionEnvironment env) {
 
@@ -150,9 +153,11 @@ public class FlinkBPSGenerator {
     System.out.println("-- from coll");
 
 
-    ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Product.class, new ProductSerializer());
-    ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class, new TransactionSerializer());
+//    env.registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Product.class, new ProductSerializer());
+//    env.registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class, new TransactionSerializer());
 
+    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
+    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
 
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);
@@ -205,18 +210,20 @@ public class FlinkBPSGenerator {
 
     @Override
     public void writeRecord(List<Transaction> transactions) throws IOException {
-      wrt.write("[");
+//      wrt.write("[");
       for (Transaction transaction : transactions) {
-        wrt.write("(");
-        wrt.write("ID=" + transaction.getId() + ", ");
-        wrt.write("Customer=" + transaction.getCustomer().getName() + ", ");
-        wrt.write("Store=" + transaction.getStore() + ", ");
-        wrt.write("DateTime=" + transaction.getDateTime() + ", ");
-        wrt.write("Products=" + transaction.getProducts());
-        wrt.write(")");
-        wrt.write("; ");
+        wrt.write(MAPPER.writeValueAsString(transaction));
+        wrt.write("\n");
+//        wrt.write("(");
+//        wrt.write("ID=" + transaction.getId() + ", ");
+//        wrt.write("Customer=" + transaction.getCustomer().getName() + ", ");
+//        wrt.write("Store=" + transaction.getStore() + ", ");
+//        wrt.write("DateTime=" + transaction.getDateTime() + ", ");
+//        wrt.write("Products=" + transaction.getProducts());
+//        wrt.write(")");
+//        wrt.write("; ");
       }
-      wrt.write("]");
+//      wrt.write("]");
     }
 
     @Override
