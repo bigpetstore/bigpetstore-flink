@@ -1,5 +1,7 @@
 package org.apache.flink.examples.java.bigpetstore;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.rnowling.bps.datagenerator.datamodels.Transaction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -11,6 +13,7 @@ import org.apache.flink.streaming.api.functions.source.FileMonitoringFunction;
  */
 public class FlinkBPSStreamingProcess {
 
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   public static void main(String[] args) throws Exception {
 
@@ -18,12 +21,13 @@ public class FlinkBPSStreamingProcess {
 
     DataStream<String> dataStream = env.readFileStream("/tmp/a", 10, FileMonitoringFunction.WatchType.ONLY_NEW_FILES);
 
-    DataStream<Tuple2<String, Integer>> counts =
+    DataStream<Tuple2<Transaction, Integer>> counts =
         dataStream.map(
-            new MapFunction<String, Tuple2<String, Integer>>() {
+            new MapFunction<String, Tuple2<Transaction, Integer>>() {
               @Override
-              public Tuple2<String, Integer> map(String s) throws Exception {
-                return new Tuple2<>(s, 1);
+              public Tuple2<Transaction, Integer> map(String s) throws Exception {
+                Transaction transaction = MAPPER.readValue(s, Transaction.class);
+                return new Tuple2<>(transaction, 1);
               }
             });
 
