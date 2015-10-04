@@ -21,16 +21,13 @@ public class FlinkBPSStreamingProcess {
 
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        DataStream<String> dataStream = env.readFileStream("/tmp/a", 10000, FileMonitoringFunction.WatchType.ONLY_NEW_FILES);
-
+        DataStream<String> dataStream = env.readFileStream("/tmp/a", 10, FileMonitoringFunction.WatchType.ONLY_NEW_FILES);
 
         DataStream<Tuple2<String, Integer>> counts =
-                // normalize and split each line
                 dataStream.map(
                         new MapFunction<String, Tuple2<String, Integer>>() {
                             @Override
                             public Tuple2<String, Integer> map(String s) throws Exception {
-
                                 return new Tuple2<String, Integer>(s, 1);
                             }
                         });
