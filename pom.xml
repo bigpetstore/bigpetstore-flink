@@ -141,6 +141,7 @@ under the License.
                         <target>${java.version}</target>
                         <compilerArgs>
                             <arg>-Xlint:all,-serial,-try,-options</arg>
+                            <!-- <arg>-Werror</arg> -->
                         </compilerArgs>
                     </configuration>
                 </plugin>

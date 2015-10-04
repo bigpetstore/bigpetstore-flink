@@ -64,6 +64,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.FileSinkFunction;
 import org.apache.flink.streaming.api.functions.sink.FileSinkFunctionByMillis;
+import org.apache.flink.streaming.api.functions.source.FileMonitoringFunction;
 import org.apache.flink.util.Collector;
 
 /**
@@ -126,6 +127,7 @@ public class FlinkBPSGenerator {
 
   public static void main(String[] args) throws Exception {
 
+
     final int simulationLength = 10;
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     int nStores = 100;
@@ -150,6 +152,7 @@ public class FlinkBPSGenerator {
 
     ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Product.class, new ProductSerializer());
     ExecutionEnvironment.getExecutionEnvironment().registerTypeWithKryoSerializer(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class, new TransactionSerializer());
+
 
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);
@@ -182,6 +185,10 @@ public class FlinkBPSGenerator {
 
     System.out.println("ASDF");
     System.out.println("count " + so.count().print());
+<<<<<<< HEAD
+=======
+
+>>>>>>> streaming template
     so.write((new TransactionListOutputFormat("/tmp/a")), 0L);
     env.execute();
   }
@@ -198,17 +205,17 @@ public class FlinkBPSGenerator {
 
     @Override
     public void open(int i, int i1) throws IOException {
-      super.open(i,i1);
+      super.open(i, i1);
       wrt = new OutputStreamWriter(new BufferedOutputStream(this.stream, 4096));
     }
 
     @Override
     public void writeRecord(List<Transaction> transactions) throws IOException {
       wrt.write("[");
-      for (Transaction transaction : transactions){
+      for (Transaction transaction : transactions) {
         wrt.write("(");
         wrt.write("ID=" + transaction.getId() + ", ");
-        wrt.write("Customer=" + transaction.getCustomer() + ", ");
+        wrt.write("Customer=" + transaction.getCustomer().getName() + ", ");
         wrt.write("Store=" + transaction.getStore() + ", ");
         wrt.write("DateTime=" + transaction.getDateTime() + ", ");
         wrt.write("Products=" + transaction.getProducts());
