@@ -224,7 +224,7 @@ public class Utils {
     int len = itemMatrix.get(0).length;
     Integer[] ids = new Integer[len];
     for (int i = 0; i < len; i++) {
-      ids[i] = new Integer((currentPartition - 1) * len + i);
+      ids[i] = (currentPartition - 1) * len + i;
     }
     return ids;
   }

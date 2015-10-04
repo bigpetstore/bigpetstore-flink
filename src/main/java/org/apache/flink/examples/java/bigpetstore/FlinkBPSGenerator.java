@@ -56,6 +56,7 @@ import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -181,7 +182,6 @@ public class FlinkBPSGenerator {
 
     System.out.println("ASDF");
     System.out.println("count " + so.count().print());
-//    so.writeAsText("/tmp/a");
     so.write((new TransactionListOutputFormat("/tmp/a")), 0L);
     env.execute();
   }
@@ -193,6 +193,7 @@ public class FlinkBPSGenerator {
 
     public TransactionListOutputFormat(String outputPath) {
       super(new Path(outputPath));
+      this.setWriteMode(FileSystem.WriteMode.OVERWRITE);
     }
 
     @Override
