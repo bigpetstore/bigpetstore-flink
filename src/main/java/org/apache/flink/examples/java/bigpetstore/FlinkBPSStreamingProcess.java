@@ -1,7 +1,6 @@
 package org.apache.flink.examples.java.bigpetstore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.rnowling.bps.datagenerator.datamodels.Transaction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -24,7 +23,8 @@ public class FlinkBPSStreamingProcess {
 
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    DataStream<String> dataStream = env.readFileStream(inputStreamDir, Integer.parseInt(interval), FileMonitoringFunction.WatchType.ONLY_NEW_FILES);
+    DataStream<String> dataStream = env.readFileStream(inputStreamDir, Integer.parseInt(interval),
+        FileMonitoringFunction.WatchType.ONLY_NEW_FILES);
 
     /**
      * Keep it simple : Read in maps rather than the transacted objects.
@@ -39,7 +39,7 @@ public class FlinkBPSStreamingProcess {
               }
             });
     counts.print();
-    env.execute("Streaming WordCount");
+    env.execute("Streaming Pet Data");
   }
 
 }
