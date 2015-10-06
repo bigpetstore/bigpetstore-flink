@@ -12,73 +12,73 @@ import java.util.*;
  */
 public class FlinkSerTransaction {
 
-    Double dateTime;
-    Customer customer;
-    Integer id;
-    Store store;
-    List<Map> products;
-    public FlinkSerTransaction(Transaction t){
-        dateTime=t.getDateTime();
-        customer=t.getCustomer();
-        id=t.getId();
-        store=t.getStore();
+  Double dateTime;
+  Customer customer;
+  Integer id;
+  Store store;
+  List<Map> products = new ArrayList<>();
 
-        //Store each product as a map, i.e.
-        // {name="kitty-poo-bags", brand="alpo", size="M", cost="100$"}...
-        products=new ArrayList<Map>();
-        for(Product p : t.getProducts()){
-            Map theProduct = new TreeMap<String,Object>();
-            for(String s : p.getFieldNames()){
-                theProduct.put(s, p.getFieldValue(s));
-            }
-            products.add(theProduct);
-        }
+  public FlinkSerTransaction(Transaction t) {
+    dateTime = t.getDateTime();
+    customer = t.getCustomer();
+    id = t.getId();
+    store = t.getStore();
 
+    //Store each product as a map, i.e.
+    // {name="kitty-poo-bags", brand="alpo", size="M", cost="100$"}...
+    for (Product p : t.getProducts()) {
+      Map<String, Object> theProduct = new TreeMap<>();
+      for (String s : p.getFieldNames()) {
+        theProduct.put(s, p.getFieldValue(s));
+      }
+      products.add(theProduct);
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
+  }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
+  public Customer getCustomer() {
+    return customer;
+  }
 
-    public Integer getId() {
-        return id;
-    }
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
+  }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+  public Integer getId() {
+    return id;
+  }
 
-    public Store getStore() {
-        return store;
-    }
+  public void setId(Integer id) {
+    this.id = id;
+  }
 
-    public void setStore(Store store) {
-        this.store = store;
-    }
+  public Store getStore() {
+    return store;
+  }
 
-    public List<Map> getProducts() {
-        return products;
-    }
+  public void setStore(Store store) {
+    this.store = store;
+  }
 
-    public void setProducts(List<Map> products) {
-        this.products = products;
-    }
+  public List<Map> getProducts() {
+    return products;
+  }
 
-    public Double getDateTime() {
-        return dateTime;
-    }
+  public void setProducts(List<Map> products) {
+    this.products = products;
+  }
 
-    public void setDateTime(Double dateTime) {
-        this.dateTime = dateTime;
-    }
+  public Double getDateTime() {
+    return dateTime;
+  }
 
-    public FlinkSerTransaction(){
+  public void setDateTime(Double dateTime) {
+    this.dateTime = dateTime;
+  }
 
-    }
+  public FlinkSerTransaction() {
+
+  }
 
 
 }
