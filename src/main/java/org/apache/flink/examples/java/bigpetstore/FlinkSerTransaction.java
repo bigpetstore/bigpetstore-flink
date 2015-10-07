@@ -16,7 +16,7 @@ public class FlinkSerTransaction {
   Customer customer;
   Integer id;
   Store store;
-  List<Map> products = new ArrayList<>();
+  List<Map<String,Object>> products = new ArrayList<>();
 
   public FlinkSerTransaction(Transaction t) {
     dateTime = t.getDateTime();
@@ -60,11 +60,11 @@ public class FlinkSerTransaction {
     this.store = store;
   }
 
-  public List<Map> getProducts() {
+  public List<Map<String, Object>> getProducts() {
     return products;
   }
 
-  public void setProducts(List<Map> products) {
+  public void setProducts(List<Map<String, Object>> products) {
     this.products = products;
   }
 
