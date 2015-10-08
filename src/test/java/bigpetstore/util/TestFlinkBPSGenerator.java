@@ -29,7 +29,7 @@ public class TestFlinkBPSGenerator {
   @Test
   public void test1(){
     try{
-      FlinkBPSGenerator.main("/tmp/a","10","10");
+      FlinkBPSGenerator.main("/tmp/a","1000","1000");
 
 
       FlinkBPSStreamingProcess.main("/tmp/a","10");

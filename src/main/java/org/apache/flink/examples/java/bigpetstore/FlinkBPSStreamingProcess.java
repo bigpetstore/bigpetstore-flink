@@ -1,11 +1,17 @@
 package org.apache.flink.examples.java.bigpetstore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.rnowling.bps.datagenerator.datamodels.Customer;
+import com.github.rnowling.bps.datagenerator.datamodels.Transaction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.common.functions.GroupReduceFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.FileMonitoringFunction;
+import org.apache.flink.util.Collector;
 
 import java.util.Map;
 
@@ -29,17 +35,44 @@ public class FlinkBPSStreamingProcess {
     /**
      * Keep it simple : Read in maps rather than the transacted objects.
      */
-    DataStream<Tuple2<Map, Integer>> counts =
-        dataStream.map(
-            new MapFunction<String, Tuple2<Map, Integer>>() {
-              @Override
-              public Tuple2<Map, Integer> map(String s) throws Exception {
-                Map transaction = MAPPER.readValue(s, Map.class);
-                return new Tuple2<>(transaction, 1);
-              }
-            });
+//    DataStream<Tuple2<Map, Integer>> counts =
+//        dataStream.map(
+//            new MapFunction<String, Tuple2<Map, Integer>>() {
+//              @Override
+//              public Tuple2<Map, Integer> map(String s) throws Exception {
+//                Map transaction = MAPPER.readValue(s, Map.class);
+//                System.out.println(transaction.get("customer"));
+//                return new Tuple2<>(transaction, 1);
+//              }
+//            });
+
+    DataStream<Tuple2<String, Integer>> counts =
+        dataStream.flatMap(new Splitter())
+        .groupBy(0).sum(1);
+
     counts.print();
-    env.execute("Streaming Pet Data");
+
+    env.execute("Streaming WordCount");
   }
+
+
+  public static class Splitter implements FlatMapFunction<String, Tuple2<String, Integer>> {
+    @Override
+    public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
+      Map transaction = MAPPER.readValue(s, Map.class);
+      Map customer = (Map) transaction.get("customer");
+      String state = (String)((Map) customer.get("location")).get("state");
+      collector.collect(new Tuple2<>(state,1));
+    }
+  }
+
+
+  /**
+   * We intentionally use a user specified failure exception
+   */
+  public static class SuccessException extends Exception {
+
+  }
+
 
 }
