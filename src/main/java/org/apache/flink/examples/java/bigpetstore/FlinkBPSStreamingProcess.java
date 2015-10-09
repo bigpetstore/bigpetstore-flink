@@ -1,13 +1,9 @@
 package org.apache.flink.examples.java.bigpetstore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.rnowling.bps.datagenerator.datamodels.Customer;
-import com.github.rnowling.bps.datagenerator.datamodels.Transaction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.functions.GroupReduceFunction;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.FileMonitoringFunction;
@@ -15,9 +11,6 @@ import org.apache.flink.util.Collector;
 
 import java.util.Map;
 
-/**
- * Created by jayvyas on 10/3/15.
- */
 public class FlinkBPSStreamingProcess {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -25,7 +18,11 @@ public class FlinkBPSStreamingProcess {
   /**
    *
    */
-  public static void main(String inputStreamDir, String interval) throws Exception {
+  public static void main(String[] args) throws Exception {
+
+    ParameterTool parameterTool = ParameterTool.fromArgs(args);
+    String inputStreamDir = parameterTool.get("inputStreamDir");
+    String interval = parameterTool.get("interval");
 
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -60,6 +57,7 @@ public class FlinkBPSStreamingProcess {
     @Override
     public void flatMap(String s, Collector<Tuple2<String, Integer>> collector) throws Exception {
       Map transaction = MAPPER.readValue(s, Map.class);
+      System.out.println(transaction);
       Map customer = (Map) transaction.get("customer");
       String state = (String)((Map) customer.get("location")).get("state");
       collector.collect(new Tuple2<>(state,1));
