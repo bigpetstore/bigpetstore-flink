@@ -29,10 +29,8 @@ public class TestFlinkBPSGenerator {
   @Test
   public void test1(){
     try{
-      FlinkBPSGenerator.main("/tmp/a","1000","1000");
-
-
-      FlinkBPSStreamingProcess.main("/tmp/a","10");
+      FlinkBPSGenerator.main(new String[]{"--inputFile","/tmp/a","--inSimLength","1000","--inStores","1000"});
+      FlinkBPSStreamingProcess.main(new String[]{"--inputStreamDir","/tmp/a","--interval","10"});
     }
     catch(Exception e){
       e.printStackTrace();
