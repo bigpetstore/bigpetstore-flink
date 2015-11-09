@@ -45,7 +45,7 @@ public class FlinkBPSStreamingProcess {
 
     DataStream<Tuple2<String, Integer>> counts =
         dataStream.flatMap(new Splitter())
-        .groupBy(0).sum(1);
+        .keyBy(0).sum(1);
 
     counts.print();
 

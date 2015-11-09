@@ -18,7 +18,6 @@
 
 package org.apache.flink.examples.java.bigpetstore;
 
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -54,7 +53,7 @@ public class FlinkStreamingRecommender {
                                     .map(new GetUserVector())
                                     .broadcast()
                                     .map(new PartialTopItem(NUM_TOP_K))
-                                    .groupBy(0)
+                                    .keyBy(0)
                                     .flatMap(new GlobalTopK());
 
     recommendations.print();
