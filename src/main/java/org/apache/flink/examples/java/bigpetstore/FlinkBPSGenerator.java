@@ -122,6 +122,7 @@ public class FlinkBPSGenerator {
         });
 
     so.write(new TransactionListOutputFormat(inputFile), 0L);
+
     env.execute();
   }
 
