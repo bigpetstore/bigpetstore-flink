@@ -20,9 +20,10 @@ package org.apache.flink.examples.java.bigpetstore.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 
 public class Utils {
 
@@ -65,25 +66,19 @@ public class Utils {
    *            values array to get the largest values from
    */
   public static void getTopK(int k, Integer[] topIDs, Double[] topValues, Integer[] ids, Double[] values) {
-    if (k > ids.length) {
-      k = ids.length;
-    }
 
-    TreeSet<Item> topItems = new TreeSet<>();
+    PriorityQueue<Item> queue = new PriorityQueue<>();
 
     int i;
-    for (i = 0; i < k; i++) {
-      topItems.add(new Item(ids[i], values[i]));
-    }
-
-    while (i < ids.length) {
-      topItems.add(new Item(ids[i], values[i]));
-      topItems.pollLast();
-      i++;
+    for (i = 0; i < ids.length; i++) {
+      queue.add(new Item(ids[i], values[i]));
+      while (queue.size() > k) {
+        queue.poll();
+      }
     }
 
     i = 0;
-    for (Item item : topItems) {
+    for (Item item : queue) {
       topIDs[i] = item.getId();
       topValues[i] = item.getValue();
       i++;
@@ -149,8 +144,9 @@ public class Utils {
     numOfPartitions = k;
     if (!read) {
       List<double[]> rows = new ArrayList<>();
+      BufferedReader br = null;
       try {
-        BufferedReader br = new BufferedReader(new FileReader(
+        br = new BufferedReader(new FileReader(
                 "src/main/resources/testdata/als_streaming/sampledb2/q"));
         while (true) {
           String line = br.readLine();
@@ -166,9 +162,16 @@ public class Utils {
           rows.add(row);
 
         }
-        br.close();
       } catch (Exception e) {
         e.printStackTrace();
+      } finally {
+        if (br != null) {
+          try {
+            br.close();
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
       }
 
       for (int i = 0; i < k; i++) {
@@ -190,8 +193,10 @@ public class Utils {
 
   public static Double[][] getUserMatrix() {
     List<Double[]> rows = new ArrayList<>();
+    BufferedReader br = null;
+
     try {
-      BufferedReader br = new BufferedReader(new FileReader(
+      br = new BufferedReader(new FileReader(
               "src/main/resources/testdata/als_streaming/sampledb2/p"));
       while (true) {
         String line = br.readLine();
@@ -207,10 +212,17 @@ public class Utils {
         rows.add(row);
 
       }
-      br.close();
     } catch (Exception e) {
       e.printStackTrace();
-    }
+    } finally {
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+     }
 
     Double[][] userMatrix = new Double[rows.size()][];
     for (int i = 0; i < rows.size(); i++) {
