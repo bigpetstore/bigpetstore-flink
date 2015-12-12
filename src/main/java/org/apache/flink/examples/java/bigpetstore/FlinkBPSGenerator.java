@@ -91,6 +91,7 @@ public class FlinkBPSGenerator {
 
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
     env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
+    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Pair.class);
 
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);

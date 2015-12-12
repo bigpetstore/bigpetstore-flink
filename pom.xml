@@ -23,7 +23,7 @@ under the License.
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.bigtop</groupId>
     <artifactId>flink-bps</artifactId>
-    <name>flink-java-examples</name>
+    <name>flink-bigpetstore</name>
     <version>0.1</version>
     <packaging>jar</packaging>
 
@@ -31,7 +31,7 @@ under the License.
         <java.version>1.7</java.version>
         <scala.version>2.10</scala.version>
         <maven.version.min>3.2.1</maven.version.min>
-        <flink.version>0.10-SNAPSHOT</flink.version>
+        <flink.version>0.10.1</flink.version>
     </properties>
 
     <repositories>
@@ -42,27 +42,8 @@ under the License.
         </repository>
     </repositories>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-        </dependency>
 
-        <dependency>
-            <groupId>com.esotericsoftware.kryo</groupId>
-            <artifactId>kryo</artifactId>
-            <version>2.16</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-clients</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
+        <!-- Flink batch APIs, will eliminate flink-java -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-java</artifactId>
@@ -73,15 +54,38 @@ under the License.
             <artifactId>flink-scala</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
+        <!-- Flink streaming API, implementation in Java -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.4.5</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java</artifactId>
+            <version>${flink.version}</version>
         </dependency>
+
+        <!-- Flink ML for the recommender -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-ml</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+
+
+        <!-- Data generator -->
         <dependency>
             <groupId>com.github.rnowling.bigpetstore</groupId>
             <artifactId>bigpetstore-data-generator</artifactId>
             <version>0.2.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.5</version>
         </dependency>
 
         <dependency>
@@ -110,9 +114,85 @@ under the License.
                 <artifactId>maven-jar-plugin</artifactId>
                 <executions>
 
-
                 </executions>
             </plugin>
+
+            <!-- Scala Compiler -->
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>3.1.4</version>
+                <executions>
+                    <!-- Run scala compiler in the process-resources phase, so that dependencies on
+                     scala classes can be resolved later in the (Java) compile phase -->
+                    <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- Run scala compiler in the process-test-resources phase, so that dependencies on
+                     scala classes can be resolved later in the (Java) test-compile phase -->
+                    <execution>
+                        <id>scala-test-compile</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jvmArgs>
+                        <jvmArg>-Xms128m</jvmArg>
+                        <jvmArg>-Xmx512m</jvmArg>
+                    </jvmArgs>
+                    <compilerPlugins combine.children="append">
+                        <compilerPlugin>
+                            <groupId>org.scalamacros</groupId>
+                            <artifactId>paradise_2.10.4</artifactId>
+                            <version>2.0.1</version>
+                        </compilerPlugin>
+                    </compilerPlugins>
+                </configuration>
+            </plugin>
+
+            <!-- Adding scala source directories to build path -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <!-- Add src/main/scala to eclipse build path -->
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/main/scala</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <!-- Add src/test/scala to eclipse build path -->
+                    <execution>
+                        <id>add-test-source</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>add-test-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>src/test/scala</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
         <pluginManagement>
             <plugins>
@@ -175,83 +255,6 @@ under the License.
                         </execution>
                     </executions>
                 </plugin>
-
-                <!-- Scala Compiler -->
-                <plugin>
-                    <groupId>net.alchim31.maven</groupId>
-                    <artifactId>scala-maven-plugin</artifactId>
-                    <version>3.1.4</version>
-                    <executions>
-                        <!-- Run scala compiler in the process-resources phase, so that dependencies on
-                         scala classes can be resolved later in the (Java) compile phase -->
-                        <execution>
-                            <id>scala-compile-first</id>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-
-                        <!-- Run scala compiler in the process-test-resources phase, so that dependencies on
-                         scala classes can be resolved later in the (Java) test-compile phase -->
-                        <execution>
-                            <id>scala-test-compile</id>
-                            <phase>process-test-resources</phase>
-                            <goals>
-                                <goal>testCompile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <jvmArgs>
-                            <jvmArg>-Xms128m</jvmArg>
-                            <jvmArg>-Xmx512m</jvmArg>
-                        </jvmArgs>
-                        <compilerPlugins combine.children="append">
-                            <compilerPlugin>
-                                <groupId>org.scalamacros</groupId>
-                                <artifactId>paradise_2.10.4</artifactId>
-                                <version>2.0.1</version>
-                            </compilerPlugin>
-                        </compilerPlugins>
-                    </configuration>
-                </plugin>
-
-                <!-- Adding scala source directories to build path -->
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.7</version>
-                    <executions>
-                        <!-- Add src/main/scala to eclipse build path -->
-                        <execution>
-                            <id>add-source</id>
-                            <phase>generate-sources</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>src/main/scala</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                        <!-- Add src/test/scala to eclipse build path -->
-                        <execution>
-                            <id>add-test-source</id>
-                            <phase>generate-test-sources</phase>
-                            <goals>
-                                <goal>add-test-source</goal>
-                            </goals>
-                            <configuration>
-                                <sources>
-                                    <source>src/test/scala</source>
-                                </sources>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-
             </plugins>
         </pluginManagement>
 
