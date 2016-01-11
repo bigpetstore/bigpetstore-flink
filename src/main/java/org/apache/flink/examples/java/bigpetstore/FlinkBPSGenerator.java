@@ -89,9 +89,6 @@ public class FlinkBPSGenerator {
       customers.add(cg.generate());
     }
 
-    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
-    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
-
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);
 
@@ -122,7 +119,6 @@ public class FlinkBPSGenerator {
         });
 
     so.write(new TransactionListOutputFormat(inputFile), 0L);
-
     env.execute();
   }
 
