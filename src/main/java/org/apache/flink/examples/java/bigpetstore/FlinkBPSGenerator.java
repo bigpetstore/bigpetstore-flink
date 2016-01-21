@@ -88,7 +88,7 @@ public class FlinkBPSGenerator {
     for (int i = 0; i < nStores; i++) {
       customers.add(cg.generate());
     }
-    
+
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);
 

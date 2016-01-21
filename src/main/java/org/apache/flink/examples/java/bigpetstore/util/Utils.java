@@ -147,17 +147,18 @@ public class Utils {
       BufferedReader br = null;
       try {
         br = new BufferedReader(new FileReader(
-                "src/main/resources/testdata/als_streaming/sampledb2/q"));
+                "/tmp/flink-item-factors/flink-item-factors2"));
         while (true) {
           String line = br.readLine();
           String[] nums;
           if (line == null) {
             break;
           } else
-            nums = line.split("\\|");
-          double[] row = new double[nums.length - 1];
-          for (int i = 1; i <= row.length; i++) {
-            row[i - 1] = Double.parseDouble(nums[i]);
+            line = line.replace("(", "").replace(")", "");
+            nums = line.split(",");
+            double[] row = new double[nums.length - 1];
+            for (int i = 1; i <= row.length; i++) {
+              row[i - 1] = Double.parseDouble(nums[i]);
           }
           rows.add(row);
 
@@ -197,17 +198,18 @@ public class Utils {
 
     try {
       br = new BufferedReader(new FileReader(
-              "src/main/resources/testdata/als_streaming/sampledb2/p"));
+              "/tmp/flink-item-factors/flink-item-factors2"));
       while (true) {
         String line = br.readLine();
         String[] nums;
         if (line == null) {
           break;
         } else
-          nums = line.split("\\|");
-        Double[] row = new Double[nums.length - 1];
-        for (int i = 1; i <= row.length; i++) {
-          row[i - 1] = Double.parseDouble(nums[i]);
+          line = line.replace("(", "").replace(")", "");
+          nums = line.split(",");
+          Double[] row = new Double[nums.length - 1];
+          for (int i = 1; i <= row.length; i++) {
+            row[i - 1] = Double.parseDouble(nums[i]);
         }
         rows.add(row);
 

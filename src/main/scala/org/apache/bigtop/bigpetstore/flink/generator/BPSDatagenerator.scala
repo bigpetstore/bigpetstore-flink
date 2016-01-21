@@ -25,7 +25,7 @@ object BPSDatagenerator {
     val seed = parameters.getInt("seed", 42)
     val numStores = parameters.getInt("numStores", 10)
     val numCustomers = parameters.getInt("numCustomers", 100)
-    val simLength = parameters.getDouble("simLength", 10.0)
+    val simLength = parameters.getDouble("simLength", 1.0)
     val output = parameters.get("output", "/tmp/flink-bps-out")
 
     // Initialize context
@@ -47,7 +47,7 @@ object BPSDatagenerator {
       .withBroadcastSet(storesDataSet, "stores")
 
     // Generate unique product IDs
-    val productsWithIndex = transactions.flatMap( _.getProducts)
+    val productsWithIndex = transactions.flatMap(_.getProducts)
       .map(_.toString)
       .distinct
       .zipWithUniqueId
