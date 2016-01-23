@@ -1,4 +1,4 @@
-package org.apache.flink.examples.java.bigpetstore;
+package org.apache.bigtop.bigpetstore.flink;
 
 import com.github.rnowling.bps.datagenerator.datamodels.Customer;
 import com.github.rnowling.bps.datagenerator.datamodels.Product;

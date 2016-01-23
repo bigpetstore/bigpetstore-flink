@@ -29,9 +29,9 @@ under the License.
 
     <properties>
         <java.version>1.7</java.version>
-        <scala.version>2.10</scala.version>
-        <maven.version.min>3.2.1</maven.version.min>
-        <flink.version>0.10.1</flink.version>
+        <scala.version>2.10.4</scala.version>
+        <maven.version.min>3.3</maven.version.min>
+        <flink.version>1.0-Snapshot</flink.version>
     </properties>
 
     <repositories>
@@ -88,22 +88,6 @@ under the License.
             <version>2.4.5</version>
         </dependency>
 
-        <dependency>
-            <groupId>args4j</groupId>
-            <artifactId>args4j</artifactId>
-            <version>2.0.23</version>
-        </dependency>
-
-
-        <!-- clone asf bigtop, run "cd bigtop-bigpetstore/bigpetstore-data-generator/ ; gradle install
-        <dependency>
-            <groupId>org.apache.bigtop</groupId>
-            <artifactId>bigpetstore-data-generator</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
-        </dependency>
-        -->
-
-
     </dependencies>
 
 
@@ -121,7 +105,7 @@ under the License.
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.1.4</version>
+                <version>3.2.0</version>
                 <executions>
                     <!-- Run scala compiler in the process-resources phase, so that dependencies on
                      scala classes can be resolved later in the (Java) compile phase -->

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.examples.java.bigpetstore.util;
+package org.apache.bigtop.bigpetstore.flink.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -144,10 +144,9 @@ public class Utils {
     numOfPartitions = k;
     if (!read) {
       List<double[]> rows = new ArrayList<>();
-      BufferedReader br = null;
-      try {
-        br = new BufferedReader(new FileReader(
-                "src/main/resources/testdata/als_streaming/sampledb2/q"));
+      try (final BufferedReader br =
+               new BufferedReader(new FileReader(
+                   "src/main/resources/testdata/als_streaming/sampledb2/q"))){
         while (true) {
           String line = br.readLine();
           String[] nums;
@@ -162,16 +161,8 @@ public class Utils {
           rows.add(row);
 
         }
-      } catch (Exception e) {
+      } catch (IOException e) {
         e.printStackTrace();
-      } finally {
-        if (br != null) {
-          try {
-            br.close();
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        }
       }
 
       for (int i = 0; i < k; i++) {
@@ -193,11 +184,9 @@ public class Utils {
 
   public static Double[][] getUserMatrix() {
     List<Double[]> rows = new ArrayList<>();
-    BufferedReader br = null;
 
-    try {
-      br = new BufferedReader(new FileReader(
-              "src/main/resources/testdata/als_streaming/sampledb2/p"));
+    try (final BufferedReader br = new BufferedReader(
+                 new FileReader("src/main/resources/testdata/als_streaming/sampledb2/p"))) {
       while (true) {
         String line = br.readLine();
         String[] nums;
@@ -212,17 +201,9 @@ public class Utils {
         rows.add(row);
 
       }
-    } catch (Exception e) {
+    } catch (IOException e) {
       e.printStackTrace();
-    } finally {
-      if (br != null) {
-        try {
-          br.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-     }
+    }
 
     Double[][] userMatrix = new Double[rows.size()][];
     for (int i = 0; i < rows.size(); i++) {
