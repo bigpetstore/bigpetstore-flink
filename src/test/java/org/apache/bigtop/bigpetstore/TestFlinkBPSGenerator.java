@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package bigpetstore.util;
-import org.apache.flink.examples.java.bigpetstore.FlinkBPSGenerator;
-import org.apache.flink.examples.java.bigpetstore.FlinkBPSStreamingProcess;
+package org.apache.bigtop.bigpetstore;
+
+import org.apache.bigtop.bigpetstore.flink.FlinkBPSGenerator;
+import org.apache.bigtop.bigpetstore.flink.FlinkBPSStreamingProcess;
 import org.junit.Test;
 
 /**

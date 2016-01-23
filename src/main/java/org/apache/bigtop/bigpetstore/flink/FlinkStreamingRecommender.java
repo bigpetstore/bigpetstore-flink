@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-package org.apache.flink.examples.java.bigpetstore;
+package org.apache.bigtop.bigpetstore.flink;
 
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.examples.java.bigpetstore.util.Utils;
+import org.apache.bigtop.bigpetstore.flink.util.Utils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
@@ -49,12 +49,13 @@ public class FlinkStreamingRecommender {
 
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-    DataStream recommendations = env.socketTextStream("localhost", 9999)
-                                    .map(new GetUserVector())
-                                    .broadcast()
-                                    .map(new PartialTopItem(NUM_TOP_K))
-                                    .keyBy(0)
-                                    .flatMap(new GlobalTopK());
+    DataStream<Tuple3<Integer, Integer[], Double[]>> recommendations =
+        env.socketTextStream("localhost", 9999)
+            .map(new GetUserVector())
+            .broadcast()
+            .map(new PartialTopItem(NUM_TOP_K))
+            .keyBy(0)
+            .flatMap(new GlobalTopK());
 
     recommendations.print();
 
@@ -83,7 +84,7 @@ public class FlinkStreamingRecommender {
     @Override
     public Tuple2<Integer, Double[]> map(String s) throws Exception {
       Integer id = Integer.parseInt(s);
-      return new Tuple2(id, userVectorMatrix[id]);
+      return new Tuple2<>(id, userVectorMatrix[id]);
     }
   }
 

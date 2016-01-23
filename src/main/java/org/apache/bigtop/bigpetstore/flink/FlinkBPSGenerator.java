@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.examples.java.bigpetstore;
+package org.apache.bigtop.bigpetstore.flink;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -45,7 +45,6 @@ import org.apache.flink.api.common.io.FileOutputFormat;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
-import org.apache.flink.shaded.com.google.common.collect.Lists;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -72,22 +71,26 @@ public class FlinkBPSGenerator {
     String inputFile = parameterTool.get("inputFile");
     final int simulationLength = Integer.parseInt(parameterTool.get("inSimLength"));
     final int nStores = Integer.parseInt(parameterTool.get("inStores"));
+    final long seed = parameterTool.getLong("seed", 42);
 
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
     final InputData id = new DataLoader().loadData();
 
-    //TODO Should we  reuse the seed factory?
-    StoreGenerator sg = new StoreGenerator(id, new SeedFactory(1));//see above todo
+    StoreGenerator sg = new StoreGenerator(id, new SeedFactory(seed));
     final List<Store> stores = new ArrayList<>();
     for (int i = 0; i < nStores; i++) {
       stores.add(sg.generate());
     }
-    CustomerGenerator cg = new CustomerGenerator(id, stores, new SeedFactory(1));//see above todo
-    final List<Customer> customers = Lists.newArrayList();
+    CustomerGenerator cg = new CustomerGenerator(id, stores, new SeedFactory(seed));
+    final List<Customer> customers = new ArrayList<>();
     for (int i = 0; i < nStores; i++) {
       customers.add(cg.generate());
     }
+
+//    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Product.class);
+//    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Transaction.class);
+//    env.registerType(com.github.rnowling.bps.datagenerator.datamodels.Pair.class);
     
     //now need to put customers into n partitions, and have each partition run a generator.
     DataStream<Customer> data = env.fromCollection(customers);
@@ -97,16 +100,17 @@ public class FlinkBPSGenerator {
     SingleOutputStreamOperator<List<Transaction>, ?> so = data.map(
         new MapFunction<Customer, List<Transaction>>() {
           public List<Transaction> map(Customer value) throws Exception {
-
             Collection<ProductCategory> products = id.getProductCategories();
+            PurchasingProfileGenerator profileGen =
+                new PurchasingProfileGenerator(products, new SeedFactory(1));
 
-            //TODO reuse seedfactory variable above.
-            PurchasingProfileGenerator profileGen = new PurchasingProfileGenerator(products, new SeedFactory(1));
             PurchasingProfile profile = profileGen.generate();
-            TransactionGenerator transGen = new TransactionGenerator(value, profile, stores, products, new SeedFactory(1));
-            List<Transaction> transactions = Lists.newArrayList();
+            TransactionGenerator transGen =
+                new TransactionGenerator(value, profile, stores, products, new SeedFactory(1));
+            List<Transaction> transactions = new ArrayList<>();
             Transaction transaction = transGen.generate();
             transactions.add(transaction);
+
             //Create a list of this customer's transactions for the time period
             while (transaction.getDateTime() < simulationLength) {
               if (transaction.getDateTime() > BURNIN_TIME) {
