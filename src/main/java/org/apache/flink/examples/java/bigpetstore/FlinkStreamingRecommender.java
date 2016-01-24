@@ -38,7 +38,7 @@ import java.util.Map;
  * item matrix and the user vector. To compute the global top k these are grouped by
  * user.
  *
- * Usage: run a 'nc -lk 9999' and type integers in [0-299].
+ * Usage: run a 'nc -lk 9999' and type integers in [0-99].
  */
 @SuppressWarnings("unchecked")
 public class FlinkStreamingRecommender {

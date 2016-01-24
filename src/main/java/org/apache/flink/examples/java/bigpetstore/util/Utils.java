@@ -147,7 +147,7 @@ public class Utils {
       BufferedReader br = null;
       try {
         br = new BufferedReader(new FileReader(
-                "/tmp/flink-item-factors/flink-item-factors2"));
+                "/tmp/flink-item-factors/"));
         while (true) {
           String line = br.readLine();
           String[] nums;
@@ -198,7 +198,7 @@ public class Utils {
 
     try {
       br = new BufferedReader(new FileReader(
-              "/tmp/flink-item-factors/flink-item-factors2"));
+              "/tmp/flink-item-factors/"));
       while (true) {
         String line = br.readLine();
         String[] nums;

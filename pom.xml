@@ -69,6 +69,12 @@ under the License.
             <version>${flink.version}</version>
         </dependency>
 
+        <!-- Table API for ETL -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
 
         <!-- Data generator -->
         <dependency>
