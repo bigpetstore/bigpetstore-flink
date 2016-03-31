@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-package org.apache.flink.examples.java.bigpetstore.util;
+package org.apache.bigtop.bigpetstore.flink.java.util;
+
+import org.apache.flink.api.java.utils.ParameterTool;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -147,7 +149,7 @@ public class Utils {
       BufferedReader br = null;
       try {
         br = new BufferedReader(new FileReader(
-                "/tmp/flink-item-factors/"));
+                "/tmp/flink-product-factors/"));
         while (true) {
           String line = br.readLine();
           String[] nums;
@@ -198,7 +200,7 @@ public class Utils {
 
     try {
       br = new BufferedReader(new FileReader(
-              "/tmp/flink-item-factors/"));
+              "/tmp/flink-product-factors/"));
       while (true) {
         String line = br.readLine();
         String[] nums;
@@ -241,5 +243,14 @@ public class Utils {
       ids[i] = (currentPartition - 1) * len + i;
     }
     return ids;
+  }
+
+  public static ParameterTool parseArgs(String[] args) throws IOException {
+    if (args.length != 1) {
+      System.out.println("You must specify a properties file with job config.");
+      System.exit(2);
+    }
+
+    return ParameterTool.fromPropertiesFile(args[0]);
   }
 }

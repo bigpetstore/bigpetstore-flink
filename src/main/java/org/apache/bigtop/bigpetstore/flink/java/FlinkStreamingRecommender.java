@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-package org.apache.flink.examples.java.bigpetstore;
+package org.apache.bigtop.bigpetstore.flink.java;
 
+import org.apache.bigtop.bigpetstore.flink.java.util.Utils;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.examples.java.bigpetstore.util.Utils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;

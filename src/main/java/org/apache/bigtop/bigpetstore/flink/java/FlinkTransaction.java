@@ -1,4 +1,4 @@
-package org.apache.flink.examples.java.bigpetstore;
+package org.apache.bigtop.bigpetstore.flink.java;
 
 import com.github.rnowling.bps.datagenerator.datamodels.*;
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.ZipcodeRecord;

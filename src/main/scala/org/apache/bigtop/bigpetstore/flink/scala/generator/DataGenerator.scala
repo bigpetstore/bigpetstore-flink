@@ -1,4 +1,4 @@
-package org.apache.bigtop.bigpetstore.flink.generator
+package org.apache.bigtop.bigpetstore.flink.scala.generator
 
 import java.util
 
@@ -6,12 +6,12 @@ import com.github.rnowling.bps.datagenerator._
 import com.github.rnowling.bps.datagenerator.datamodels._
 import com.github.rnowling.bps.datagenerator.datamodels.inputs.ProductCategory
 import com.github.rnowling.bps.datagenerator.framework.SeedFactory
+import org.apache.bigtop.bigpetstore.flink.java.FlinkTransaction
+import org.apache.bigtop.bigpetstore.flink.java.util.Utils
 import org.apache.flink.api.common.functions.RichFlatMapFunction
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.examples.java.bigpetstore.FlinkTransaction
 import org.apache.flink.util.Collector
 
 import scala.collection.JavaConversions._
@@ -20,17 +20,16 @@ object DataGenerator {
   def main(args: Array[String]) {
 
     // parse input parameters
-    val parameters = ParameterTool.fromArgs(args)
-    val seed = parameters.getInt("seed", 42)
-    val numStores = parameters.getInt("numStores", 10)
-    val numCustomers = parameters.getInt("numCustomers", 100)
-    val burningTime = parameters.getDouble("burningTime", 1.0)
-    val simLength = parameters.getDouble("simLength", 100.0)
-    val output = parameters.get("output", "/tmp/flink-bps-out")
-
-    val startTime = java.lang.System.currentTimeMillis().toDouble / (24 * 3600 * 1000)
+    val parameters = Utils.parseArgs(args)
+    val seed = parameters.getRequired("seed").toInt
+    val numStores = parameters.getRequired("numStores").toInt
+    val numCustomers = parameters.getRequired("numCustomers").toInt
+    val burningTime = parameters.getRequired("burningTime").toDouble
+    val simLength = parameters.getRequired("simLength").toDouble
+    val output = parameters.getRequired("ETLInput")
 
     // Initialize context
+    val startTime = java.lang.System.currentTimeMillis().toDouble / (24 * 3600 * 1000)
     val env = ExecutionEnvironment.getExecutionEnvironment
 
     val inputData = new DataLoader().loadData()

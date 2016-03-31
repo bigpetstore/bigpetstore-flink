@@ -1,13 +1,13 @@
-package org.apache.bigtop.bigpetstore.flink.etl
+package org.apache.bigtop.bigpetstore.flink.scala.etl
 
 import java.util.Date
 
-import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.bigtop.bigpetstore.flink.java.FlinkTransaction
+import org.apache.bigtop.bigpetstore.flink.java.util.Utils
 import org.apache.flink.api.scala._
 import org.apache.flink.api.scala.table._
 import org.apache.flink.api.scala.utils._
 import org.apache.flink.core.fs.FileSystem.WriteMode
-import org.apache.flink.examples.java.bigpetstore.FlinkTransaction
 
 import scala.collection.JavaConversions._
 
@@ -15,12 +15,12 @@ object ETL {
   def main(args: Array[String]) {
 
     // parse input parameters
-    val parameters = ParameterTool.fromArgs(args)
-    val numStores = parameters.getInt("numStores", 10)
-    val numCustomers = parameters.getInt("numCustomers", 100)
-    val simLength = parameters.getDouble("simLength", 100.0)
-    val input = parameters.get("input", "/tmp/flink-bps-out")
-    val output = parameters.get("output", "/tmp/flink-etl-out")
+    val parameters = Utils.parseArgs(args)
+    val numStores = parameters.getRequired("numStores").toInt
+    val numCustomers = parameters.getRequired("numCustomers").toInt
+    val simLength = parameters.getRequired("simLength").toDouble
+    val input = parameters.getRequired("ETLInput")
+    val output = parameters.getRequired("ETLOutput")
 
     // Initialize context
     val env = ExecutionEnvironment.getExecutionEnvironment
@@ -82,6 +82,7 @@ object ETL {
     monthTransactionCount.foreach(println(_))
   }
 
+  // Type utilities for the Table API conversions
   case class Transaction(month : Int,
                          customerId : Int, customerName : (String, String),
                          transactionId : Int,
